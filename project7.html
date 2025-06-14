@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Awesome Student Planner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@404;600&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* General Styles & Reset */
+        :root {
+            --primary-color: #8E7DBB; /* Soft Lavender Purple */
+            --secondary-color: #B4A9DA; /* Lighter Pastel Purple */
+            --accent-color: #FFDDAA; /* Light Peach/Creamy Yellow */
+            --background-light: #F8F8F8; /* Very Light Grey */
+            --card-background: #FFFFFF; /* Pure White */
+            --text-dark: #3A3A3A; /* Dark Grey for readability */
+            --text-light: #4A4A4A; /* Slightly lighter dark for light backgrounds */
+            --success-color: #6FCF97; /* Soft Green */
+            --error-color: #EB5757; /* Soft Red */
+            --shadow-light: 0 4px 8px rgba(0,0,0,0.08);
+            --shadow-deep: 0 8px 16px rgba(0,0,0,0.15);
+            --border-radius-lg: 15px;
+            --border-radius-md: 10px;
+            --border-radius-sm: 8px;
+            --calendar-border-color: #E0E0E0; /* Light grey for calendar grid */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: linear-gradient(to right bottom, var(--background-light), #F0F0F0); /* Subtle gradient for background */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: auto;
+            padding: 0 20px;
+        }
+
+        /* Header & Navigation */
+        header {
+            background: var(--primary-color);
+            color: var(--card-background); /* White text on darker header */
+            padding: 1.2rem 0;
+            box-shadow: var(--shadow-deep);
+            z-index: 1000;
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        header nav ul {
+            list-style: none;
+            display: flex;
+            gap: 25px;
+        }
+
+        header nav a {
+            color: var(--card-background); /* White text */
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 5px 0;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        header nav a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 3px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--accent-color);
+            transition: width 0.3s ease-out;
+        }
+
+        header nav a:hover::after,
+        header nav a.active::after {
+            width: 100%;
+        }
+        header nav a:hover,
+        header nav a.active {
+            color: var(--accent-color);
+        }
+
+        /* Main Content Area */
+        main {
+            flex: 1;
+            padding: 2.5rem 0;
+        }
+
+        section {
+            background: var(--card-background);
+            padding: 3rem;
+            margin-bottom: 2.5rem;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-light);
+            transition: all 0.5s ease-in-out;
+            transform: translateY(20px);
+            opacity: 0;
+            display: none; /* Hidden by default for SPA effect */
+            animation: fadeInScale 0.6s forwards ease-out;
+        }
+
+        section.active {
+            display: block;
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        h2, h3, h4 {
+            font-family: 'Poppins', sans-serif;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        h2 { font-size: 2.5rem; }
+        h3 { font-size: 2rem; }
+        h4 { font-size: 1.5rem; }
+
+        p {
+            margin-bottom: 1.2rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--secondary-color);
+            color: var(--card-background); /* White text on buttons */
+            padding: 12px 25px;
+            border: none;
+            border-radius: var(--border-radius-md);
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            background: #A093CE; /* Slightly darker secondary */
+            transform: translateY(-2px);
+            box-shadow: 4px 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn.add-btn {
+            background: var(--primary-color);
+        }
+        .btn.add-btn:hover {
+            background: #7D6FAD; /* Slightly darker primary */
+        }
+
+        .btn.danger {
+            background: var(--error-color);
+        }
+        .btn.danger:hover {
+            background: #D44444;
+        }
+
+        .btn.timer-btn {
+            background: var(--accent-color);
+            color: var(--text-dark);
+            margin: 8px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+        .btn.timer-btn:hover {
+            background: #FFCC99; /* Slightly darker accent */
+        }
+        .btn.timer-btn:disabled {
+            background: #CCC;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Home Page Specifics */
+        #home-section .hero {
+            text-align: center;
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            color: var(--card-background); /* White text on hero */
+            padding: 5rem 0;
+            border-radius: var(--border-radius-lg);
+            margin-bottom: 3rem;
+            box-shadow: var(--shadow-deep);
+            position: relative;
+            overflow: hidden;
+        }
+        #home-section .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="25" cy="25" r="5" fill="%23ffffff" opacity="0.1"/><circle cx="75" cy="75" r="5" fill="%23ffffff" opacity="0.1"/></svg>') repeat;
+            opacity: 0.15;
+            z-index: 0;
+        }
+        #home-section .hero > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        #home-section .hero h2 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--card-background); /* White text */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        #daily-vibe {
+            font-style: italic;
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            color: var(--card-background); /* White text */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* Removed #change-vibe-btn styling as the button is gone */
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 3rem;
+        }
+
+        .feature-item {
+            background: var(--background-light);
+            padding: 2rem;
+            border-radius: var(--border-radius-md);
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.03), inset -2px -2px 5px rgba(255,255,255,0.8), 4px 4px 10px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-5px);
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.05), inset -2px -2px 5px rgba(255,255,255,0.9), 8px 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .feature-item h4 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        .feature-item p {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+        }
+
+
+        /* Subjects Page Specifics */
+        .add-subject-form {
+            background: var(--background-light);
+            padding: 2rem;
+            border-radius: var(--border-radius-md);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            margin-bottom: 2.5rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .add-subject-form label {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .add-subject-form input[type="text"],
+        .add-subject-form select,
+        .add-subject-form textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--calendar-border-color);
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            color: var(--text-dark);
+            background-color: var(--card-background);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            -webkit-appearance: none; /* Remove default styling for select */
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%238E7DBB%22%20d%3D%22M287%2C197.8L159.2%2C68.9c-2.8-2.8-7.7-2.8-10.6%2C0L5.4%2C197.8c-2.8%2C2.8-2.8%2C7.7%2C0%2C10.6l12.7%2C12.7c2.8%2C2.8%2C7.7%2C2.8%2C10.6%2C0l110.1-110.1l110.1%2C110.1c2.8%2C2.8%2C7.7%2C2.8%2C10.6%2C0l12.7-12.7C289.8%2C205.5%2C289.8%2C200.6%2C287%2C197.8z%22%2F%3E%3C%2Fsvg%3E'); /* Custom arrow for select */
+            background-repeat: no-repeat;
+            background-position: right 12px top 50%;
+            background-size: 12px auto;
+        }
+        .add-subject-form input[type="text"]:focus,
+        .add-subject-form select:focus,
+        .add-subject-form textarea:focus {
+            border-color: var(--secondary-color);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.08), 0 0 0 2px rgba(var(--secondary-color), 0.2);
+            outline: none;
+        }
+        .add-subject-form textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .add-subject-form .btn {
+            width: auto;
+            margin-top: 10px;
+            justify-self: end; /* Aligns button to the right */
+        }
+        @media (min-width: 600px) {
+            .add-subject-form {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .add-subject-form textarea, .add-subject-form .btn-wrapper {
+                grid-column: span 2;
+            }
+            .add-subject-form .btn {
+                justify-self: center; /* Center the button in wider view */
+            }
+        }
+
+
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 2rem;
+        }
+
+        .subject-card {
+            background: var(--card-background); /* White background for cards */
+            border: 1px solid var(--background-light); /* Light border */
+            padding: 1.5rem;
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-light);
+            text-align: center;
+            transition: transform 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative; /* For remove button positioning */
+        }
+        .subject-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .subject-card h4 {
+            margin-bottom: 0.7rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .subject-card .grade-info {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+        .subject-card .grade-info small {
+            font-weight: normal;
+            font-size: 0.8em;
+            color: var(--text-dark);
+        }
+        .subject-card .motivation-text {
+            font-style: italic;
+            font-size: 0.95em;
+            color: var(--text-dark);
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--calendar-border-color); /* Lighter separator */
+        }
+        .subject-card .motivation-text i {
+            margin-right: 5px;
+            color: var(--primary-color);
+        }
+
+        .subject-card .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--error-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .subject-card .remove-btn:hover {
+            background-color: #D44444;
+            transform: scale(1.1);
+        }
+
+
+        /* To-Do List Page Specifics */
+        .todo-input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 2.5rem;
+            box-shadow: var(--shadow-light);
+            border-radius: var(--border-radius-md);
+            overflow: hidden;
+        }
+
+        #new-task {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            font-size: 1.1rem;
+            background-color: var(--background-light); /* Light input background */
+            outline: none;
+            color: var(--text-dark);
+        }
+
+        #new-task::placeholder {
+            color: #888;
+        }
+
+        .task-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .task-item {
+            background: var(--card-background);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--calendar-border-color); /* Lighter border */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            border-radius: var(--border-radius-sm);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-item span {
+            flex: 1;
+            margin-right: 15px;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            transition: text-decoration 0.3s ease, color 0.3s ease;
+        }
+
+        .task-item.completed {
+            background-color: #E6F3EB; /* Very light green for completed */
+        }
+        .task-item.completed span {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        .task-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .task-actions input[type="checkbox"] {
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border: 2px solid var(--secondary-color);
+            border-radius: 5px;
+            cursor: pointer;
+            position: relative;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .task-actions input[type="checkbox"]:checked {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+        .task-actions input[type="checkbox"]:checked::after {
+            content: '\2713'; /* Checkmark unicode */
+            font-size: 18px;
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: block;
+        }
+
+        .task-actions .btn.danger {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            border-radius: 5px;
+        }
+
+        #confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        /* Confetti animation keyframes (needs to be directly in style block) */
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Calendar Page Specifics */
+        .calendar-controls {
+            background: var(--background-light);
+            padding: 2rem;
+            border-radius: var(--border-radius-md);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            margin-bottom: 2.5rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .calendar-controls label {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            display: block;
+        }
+        .calendar-controls input[type="text"],
+        .calendar-controls input[type="date"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--calendar-border-color);
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            color: var(--text-dark);
+            background-color: var(--card-background);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .calendar-controls input[type="text"]:focus,
+        .calendar-controls input[type="date"]:focus {
+            border-color: var(--secondary-color);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.08), 0 0 0 2px rgba(var(--secondary-color), 0.2);
+            outline: none;
+        }
+
+        .calendar-controls .btn {
+            width: auto;
+            margin-top: 10px;
+            justify-self: end;
+        }
+
+        @media (min-width: 600px) {
+            .calendar-controls {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .calendar-controls .btn {
+                grid-column: span 3;
+                justify-self: center;
+            }
+        }
+
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 0 10px;
+        }
+
+        .calendar-nav button {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        .calendar-nav button:hover {
+            color: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        #current-month-year {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            background-color: var(--calendar-border-color); /* Grid lines */
+            border: 1px solid var(--calendar-border-color);
+            border-radius: var(--border-radius-lg);
+            overflow: hidden; /* For rounded corners */
+            box-shadow: var(--shadow-light);
+        }
+
+        .weekdays {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background: var(--background-light);
+            font-weight: 600;
+            text-align: center;
+            padding: 0.8rem 0;
+            color: var(--primary-color);
+            font-size: 1.05rem;
+        }
+
+        .weekdays span {
+            padding: 8px 0;
+        }
+
+        #calendar-days {
+            display: contents; /* Allows grid items to be direct children of calendar-grid */
+        }
+
+        .day-cell {
+            background: var(--card-background);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Align content to top */
+            align-items: center;
+            min-height: 100px; /* Increased height */
+            padding: 10px;
+            text-align: center;
+            font-size: 1.15rem;
+            border-right: 1px solid var(--calendar-border-color);
+            border-bottom: 1px solid var(--calendar-border-color);
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            position: relative;
+            overflow: hidden; /* Hide overflowing event text */
+        }
+        .day-cell:hover:not(.inactive) {
+            background-color: #F0F0F0; /* Slightly darker on hover */
+            transform: translateY(-2px);
+        }
+
+        .day-cell:nth-child(7n) {
+            border-right: none;
+        }
+        .day-cell:nth-last-child(-n+7) {
+            border-bottom: none;
+        }
+
+        .day-cell.inactive .day-number {
+            color: #CCC;
+        }
+        .day-cell.inactive {
+            background: var(--background-light); /* Lighter background for inactive */
+        }
+
+        .day-number {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1.3em;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            padding-bottom: 2px;
+            border-bottom: 1px solid transparent;
+        }
+
+        .day-cell.current-day {
+            background-color: var(--accent-color);
+            color: var(--text-dark);
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(255,221,170,0.5); /* Soft glow */
+            border-color: #FFCC99;
+            transform: scale(1.02);
+            z-index: 1; /* Bring current day slightly forward */
+        }
+        .day-cell.current-day .day-number {
+            color: var(--text-dark);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .event-item {
+            background-color: #FEEEDD; /* Very light orange for events */
+            color: #E68A00; /* Darker orange text */
+            font-size: 0.8em;
+            padding: 3px 5px;
+            border-radius: 4px;
+            margin-top: 4px;
+            width: 90%;
+            white-space: nowrap; /* Prevent text wrap */
+            overflow: hidden; /* Hide overflow */
+            text-overflow: ellipsis; /* Add ellipsis if text overflows */
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Space out text and delete button */
+        }
+        .event-item i {
+            margin-right: 4px;
+            font-size: 0.9em;
+        }
+        .day-cell.current-day .event-item {
+             background-color: var(--primary-color);
+             color: var(--card-background);
+        }
+        /* Style for the event delete button */
+        .event-item .delete-event-btn {
+            background: none;
+            border: none;
+            color: inherit; /* Inherit color from parent event-item */
+            font-size: 0.8em;
+            cursor: pointer;
+            margin-left: 5px;
+            padding: 0 3px;
+            opacity: 0.7;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .event-item .delete-event-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+
+        .calendar-note {
+            text-align: center;
+            margin-top: 2rem;
+            font-style: italic;
+            color: #777;
+            font-size: 0.95rem;
+        }
+
+        /* Study Timer Page Specifics */
+        .timer-section {
+            text-align: center;
+            padding: 3rem 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timer-circle-container {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: conic-gradient(var(--secondary-color) 0%, transparent 0%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: inset 5px 5px 10px rgba(0,0,0,0.08), inset -5px -5px 10px rgba(255,255,255,0.9), 0 5px 15px rgba(0,0,0,0.15);
+            margin: 2rem auto;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        .timer-circle-container.break-mode {
+             background: conic-gradient(#A7D9EE 0%, transparent 0%); /* Lighter Sky blue for break */
+        }
+        .timer-circle-container.paused {
+            animation: none;
+        }
+
+
+        .timer-display {
+            font-family: 'Poppins', sans-serif;
+            font-size: 3.8rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            background: var(--card-background);
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            z-index: 2; /* Above the background gradient */
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: inset 5px 5px 10px rgba(0,0,0,0.08), inset -5px -5px 10px rgba(255,255,255,0.9), 0 5px 15px rgba(0,0,0,0.15); }
+            50% { box-shadow: inset 3px 3px 6px rgba(0,0,0,0.05), inset -3px -3px 6px rgba(255,255,255,0.95), 0 8px 20px rgba(0,0,0,0.2); }
+            100% { box-shadow: inset 5px 5px 10px rgba(0,0,0,0.08), inset -5px -5px 10px rgba(255,255,255,0.9), 0 5px 15px rgba(0,0,0,0.15); }
+        }
+
+        .timer-controls {
+            margin-top: 2rem;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap; /* Allow buttons to wrap on small screens */
+            justify-content: center;
+        }
+
+        .timer-message {
+            margin-top: 1.5rem;
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            background: #E0E0E0; /* Light grey footer */
+            color: var(--text-dark);
+            text-align: center;
+            padding: 1.2rem 0;
+            margin-top: auto;
+            font-size: 0.9rem;
+            border-top: 3px solid var(--accent-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header .container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            header h1 {
+                font-size: 1.8rem;
+                float: none;
+            }
+            header nav ul {
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            header nav a {
+                font-size: 1rem;
+            }
+
+            main {
+                padding: 1.5rem 0;
+            }
+            section {
+                padding: 2rem;
+            }
+            h2 { font-size: 2rem; }
+            h3 { font-size: 1.7rem; }
+            h4 { font-size: 1.3rem; }
+
+            #home-section .hero {
+                padding: 3rem 0;
+            }
+            #home-section .hero h2 {
+                font-size: 2.5rem;
+            }
+            #daily-vibe {
+                font-size: 1.1rem;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .add-subject-form {
+                grid-template-columns: 1fr;
+            }
+            .add-subject-form textarea, .add-subject-form .btn-wrapper {
+                grid-column: span 1; /* Reset for small screens */
+            }
+            .add-subject-form .btn {
+                justify-self: stretch; /* Make button full width */
+            }
+
+            .todo-input-group {
+                flex-direction: column;
+            }
+
+            .calendar-controls {
+                grid-template-columns: 1fr;
+            }
+            .calendar-controls .btn {
+                grid-column: span 1;
+                justify-self: stretch;
+            }
+
+            .calendar-grid {
+                font-size: 0.9em;
+            }
+            .day-cell {
+                min-height: 80px; /* Adjust height for smaller screens */
+                font-size: 1rem;
+            }
+            .day-number {
+                font-size: 1.2em;
+            }
+            .event-item {
+                font-size: 0.7em;
+                padding: 2px 3px;
+                margin-top: 3px;
+            }
+
+            .timer-circle-container {
+                width: 200px;
+                height: 200px;
+            }
+            .timer-display {
+                width: 160px;
+                height: 160px;
+                font-size: 3rem;
+            }
+            .timer-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><i class="fas fa-graduation-cap"></i> Awesome Planner</h1>
+            <nav>
+                <ul>
+                    <li><a href="#home" class="nav-link" data-section="home-section"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="#subjects" class="nav-link" data-section="subjects-section"><i class="fas fa-book"></i> Subjects</a></li>
+                    <li><a href="#todo" class="nav-link" data-section="todo-section"><i class="fas fa-list-check"></i> To-Do</a></li>
+                    <li><a href="#calendar" class="nav-link" data-section="calendar-section"><i class="fas fa-calendar-alt"></i> Calendar</a></li>
+                    <li><a href="#timer" class="nav-link" data-section="timer-section"><i class="fas fa-hourglass-half"></i> Timer</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section id="home-section" class="active">
+            <div class="container">
+                <div class="hero">
+                    <h2>Hey there, Future Success!</h2>
+                    <p id="daily-vibe">"You've got this! Every small step leads to big achievements."</p>
+                </div>
+
+                <div class="features">
+                    <h3>Your Tools for Academic Awesomeness!</h3>
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <h4><i class="fas fa-chart-line"></i> Track Your Grades</h4>
+                            <p>Keep a close eye on your progress and aim for those top scores!</p>
+                            <a href="#subjects" class="btn nav-link" data-section="subjects-section"><i class="fas fa-arrow-right"></i> View Subjects</a>
+                        </div>
+                        <div class="feature-item">
+                            <h4><i class="fas fa-clipboard-list"></i> Conquer Your Tasks</h4>
+                            <p>Break down big goals into manageable steps and tick them off!</p>
+                            <a href="#todo" class="btn nav-link" data-section="todo-section"><i class="fas fa-arrow-right"></i> Go to To-Do</a>
+                        </div>
+                        <div class="feature-item">
+                            <h4><i class="fas fa-clock"></i> Boost Your Focus</h4>
+                            <p>Supercharge your study sessions with the Pomodoro technique.</p>
+                            <a href="#timer" class="btn nav-link" data-section="timer-section"><i class="fas fa-arrow-right"></i> Start Studying</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="subjects-section">
+            <div class="container">
+                <h2><i class="fas fa-book-open"></i> Your Awesome Courses & Grades</h2>
+
+                <div class="add-subject-form">
+                    <h3>Add New Subject</h3>
+                    <div>
+                        <label for="new-subject-name">Subject Name:</label>
+                        <input type="text" id="new-subject-name" placeholder="e.g., Data Structures" required aria-label="New Subject Name">
+                    </div>
+                    <div>
+                        <label for="new-subject-grade">Grade:</label>
+                        <select id="new-subject-grade" aria-label="New Subject Grade">
+                            <option value="">Select Grade</option>
+                            <option value="A+">A+</option>
+                            <option value="A">A</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B">B</option>
+                            <option value="B-">B-</option>
+                            <option value="C+">C+</option>
+                            <option value="C">C</option>
+                            <option value="C-">C-</option>
+                            <option value="D+">D+</option>
+                            <option value="D">D</option>
+                            <option value="F">F</option>
+                            <option value="P">Pass</option>
+                            <option value="NP">No Pass</option>
+                            <option value="N/A">N/A</option>
+                        </select>
+                    </div>
+                    <div class="full-width">
+                        <label for="new-subject-motivation">Motivational Message for this Subject:</label>
+                        <textarea id="new-subject-motivation" placeholder="e.g., 'Mastering this will open new doors!'" aria-label="Motivational Message"></textarea>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button id="add-subject-btn" class="btn add-btn"><i class="fas fa-plus"></i> Add Subject</button>
+                    </div>
+                </div>
+
+                <div id="subjects-list" class="subjects-grid">
+                    <p>Loading subjects...</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="todo-section">
+            <div class="container">
+                <h2><i class="fas fa-check-double"></i> Your Mission List</h2>
+                <div class="todo-input-group">
+                    <input type="text" id="new-task" placeholder="Add a new task (e.g., 'Finish Math HW by Friday')..." aria-label="New task">
+                    <button id="add-task-btn" class="btn add-btn"><i class="fas fa-plus"></i> Add Task</button>
+                </div>
+                <ul id="task-list" class="task-list">
+                    </ul>
+                <div id="confetti-container"></div> </div>
+        </section>
+
+        <section id="calendar-section">
+            <div class="container">
+                <h2><i class="fas fa-calendar-check"></i> Academic Deadlines & Events</h2>
+
+                <div class="calendar-controls">
+                    <h3>Add New Event</h3>
+                    <div>
+                        <label for="event-title">Event Title:</label>
+                        <input type="text" id="event-title" placeholder="e.g., Math Exam" required aria-label="Event Title">
+                    </div>
+                    <div>
+                        <label for="event-date">Date:</label>
+                        <input type="date" id="event-date" required aria-label="Event Date">
+                    </div>
+                    <div class="btn-wrapper">
+                        <button id="add-event-btn" class="btn add-btn"><i class="fas fa-plus"></i> Add Event</button>
+                    </div>
+                </div>
+
+                <div class="calendar-nav">
+                    <button id="prev-month-btn"><i class="fas fa-chevron-left"></i></button>
+                    <span id="current-month-year">June 2025</span>
+                    <button id="next-month-btn"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="calendar-grid">
+                    <div class="weekdays">
+                        <span>Sun</span>
+                        <span>Mon</span>
+                        <span>Tue</span>
+                        <span>Wed</span>
+                        <span>Thu</span>
+                        <span>Fri</span>
+                        <span>Sat</span>
+                    </div>
+                    <div id="calendar-days">
+                        </div>
+                </div>
+                <p class="calendar-note"><i class="fas fa-info-circle"></i> Events shown are examples. Add your important dates to your personal notes!</p>
+            </div>
+        </section>
+
+        <section id="timer-section">
+            <div class="container">
+                <h2><i class="fas fa-brain"></i> Focus Time! Pomodoro Timer</h2>
+                <div class="timer-circle-container" id="timer-circle">
+                    <div class="timer-display">
+                        <span id="minutes">25</span>:<span id="seconds">00</span>
+                    </div>
+                </div>
+                <div class="timer-controls">
+                    <button id="start-btn" class="btn timer-btn"><i class="fas fa-play"></i> Start</button>
+                    <button id="pause-btn" class="btn timer-btn" disabled><i class="fas fa-pause"></i> Pause</button>
+                    <button id="reset-btn" class="btn timer-btn"><i class="fas fa-sync-alt"></i> Reset</button>
+                </div>
+                <p id="timer-message" class="timer-message">Let's get some focused work done!</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p><i class="fas fa-sparkles"></i> Designed with <i class="fas fa-heart" style="color: #ff69b4;"></i> for Students | &copy; 2025 Awesome Planner</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Navigation Logic (SPA) ---
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+
+            function showSection(targetSectionId) {
+                sections.forEach(section => {
+                    if (section.id === targetSectionId) {
+                        section.classList.add('active');
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+
+                // Update active class on nav links
+                navLinks.forEach(link => {
+                    if (link.dataset.section === targetSectionId) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            // Handle initial load based on URL hash
+            const initialHash = window.location.hash.substring(1);
+            if (initialHash && document.getElementById(initialHash + '-section')) {
+                showSection(initialHash + '-section');
+            } else {
+                showSection('home-section'); // Default to home
+            }
+
+            // Handle navigation clicks
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetSectionId = link.dataset.section;
+                    showSection(targetSectionId);
+                    history.pushState(null, '', link.getAttribute('href'));
+                });
+            });
+
+            // --- Home Page Logic (Daily Vibe) ---
+            const dailyVibeElement = document.getElementById('daily-vibe');
+            // Removed the reference to changeVibeBtn
+
+            const vibes = [
+                "\"You've got this! Every small step leads to big achievements.\"",
+                "\"Believe in yourself and all that you are. Know that there is something inside you that is greater than any obstacle.\"",
+                "\"The expert in anything was once a beginner. Keep learning!\"",
+                "\"Your hard work today will pay off tomorrow. Stay dedicated!\"",
+                "\"Don't wait for opportunity. Create it!\"",
+                "\"Every day is a new chance to learn and grow. Make it count!\"",
+                "\"Success is the sum of small efforts repeated day in and day out.\"",
+                "\"The best way to predict the future is to create it.\"",
+                "\"Embrace the challenges, for they are opportunities in disguise.\""
+            ];
+
+            // Removed currentVibeIndex and displayNextVibe functions
+
+            function displayRandomVibeOnLoad() {
+                if (dailyVibeElement) {
+                    const randomIndex = Math.floor(Math.random() * vibes.length);
+                    dailyVibeElement.textContent = vibes[randomIndex];
+                }
+            }
+
+            // Call the function to display a random vibe on page load
+            displayRandomVibeOnLoad();
+            // Removed event listener for changeVibeBtn
+
+            // --- Subjects Page Logic ---
+            const subjectsListDiv = document.getElementById('subjects-list');
+            const newSubjectNameInput = document.getElementById('new-subject-name');
+            const newSubjectGradeSelect = document.getElementById('new-subject-grade');
+            const newSubjectMotivationInput = document.getElementById('new-subject-motivation');
+            const addSubjectBtn = document.getElementById('add-subject-btn');
+
+            let subjectsData = JSON.parse(localStorage.getItem('awesomePlannerSubjects')) || [
+                { "id": 1, "name": "Mathematics", "grade": "B+", "notes": "Focus on Algebra & Geometry", "motivation": "Unravel the logic of the universe! Math sharpens your mind and unlocks problem-solving super-powers." },
+                { "id": 2, "name": "Physics", "grade": "B", "notes": "Need to review Mechanics", "motivation": "Discover how the world works, from tiny atoms to giant galaxies. It's science in action!" },
+                { "id": 3, "name": "Chemistry", "grade": "C+", "notes": "Struggling with Organic Chemistry", "motivation": "Explore the building blocks of everything around you. Chemistry is the art of transformation!" },
+                { "id": 4, "name": "Biology", "grade": "A-", "notes": "Enjoying Genetics!", "motivation": "Dive into the wonders of life itself! From ecosystems to cells, understand what makes us tick." },
+                { "id": 5, "name": "English Literature", "grade": "A", "notes": "Great essay writing practice", "motivation": "Journey through incredible stories and ideas. Improve your communication and empathy through words." },
+                { "id": 6, "name": "History", "grade": "B+", "notes": "World History focus", "motivation": "Learn from the past to shape a better future. Every event is a story waiting to be discovered." },
+                { "id": 7, "name": "Computer Science", "grade": "A", "notes": "Loving Python!", "motivation": "Build the future with code! Computer Science teaches you to create, innovate, and solve complex problems with technology." },
+                { "id": 8, "name": "Geography", "grade": "B-", "notes": "Maps and climate zones", "motivation": "Unpack the mysteries of our planet – its landscapes, cultures, and how they connect. Become a global citizen!" },
+                { "id": 9, "name": "Economics", "grade": "N/A", "notes": "Starting next semester", "motivation": "Understand how money, markets, and societies work. Essential for making smart decisions in life!" }
+            ];
+
+            function saveSubjects() {
+                localStorage.setItem('awesomePlannerSubjects', JSON.stringify(subjectsData));
+            }
+
+            function loadSubjects() {
+                if (!subjectsListDiv) return;
+
+                subjectsListDiv.innerHTML = ''; // Clear existing subjects
+
+                if (subjectsData.length === 0) {
+                    subjectsListDiv.innerHTML = '<p><i class="fas fa-lightbulb"></i> No subjects added yet. Time to fill up your academic journey!</p>';
+                    return;
+                }
+
+                subjectsData.forEach(subject => {
+                    const subjectCard = document.createElement('div');
+                    subjectCard.classList.add('subject-card');
+                    const notesHtml = subject.notes ? `<small>(${subject.notes})</small>` : '';
+                    subjectCard.innerHTML = `
+                        <h4>${subject.name}</h4>
+                        <p class="grade-info">Grade: ${subject.grade} ${notesHtml}</p>
+                        ${subject.motivation ? `<p class="motivation-text"><i class="fas fa-lightbulb"></i> ${subject.motivation}</p>` : ''}
+                        <button class="remove-btn" data-id="${subject.id}" aria-label="Remove ${subject.name}"><i class="fas fa-times"></i></button>
+                    `;
+                    subjectsListDiv.appendChild(subjectCard);
+                });
+
+                document.querySelectorAll('.remove-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const subjectId = parseInt(e.currentTarget.dataset.id);
+                        removeSubject(subjectId);
+                    });
+                });
+            }
+
+            function addNewSubject() {
+                const name = newSubjectNameInput.value.trim();
+                const grade = newSubjectGradeSelect.value;
+                const motivation = newSubjectMotivationInput.value.trim();
+
+                if (name === '') {
+                    alert('Please enter a subject name.');
+                    return;
+                }
+                if (grade === '') {
+                    alert('Please select a grade for the subject.');
+                    return;
+                }
+
+                const newSubject = {
+                    id: subjectsData.length ? Math.max(...subjectsData.map(s => s.id)) + 1 : 1,
+                    name: name,
+                    grade: grade,
+                    notes: '',
+                    motivation: motivation || 'Keep up the great work!'
+                };
+
+                subjectsData.push(newSubject);
+                saveSubjects();
+                loadSubjects();
+
+                newSubjectNameInput.value = '';
+                newSubjectGradeSelect.value = '';
+                newSubjectMotivationInput.value = '';
+                newSubjectNameInput.focus();
+            }
+
+            function removeSubject(idToRemove) {
+                const subjectToRemove = subjectsData.find(s => s.id === idToRemove);
+                if (subjectToRemove && confirm(`Are you sure you want to remove "${subjectToRemove.name}"? This cannot be undone.`)) {
+                    subjectsData = subjectsData.filter(subject => subject.id !== idToRemove);
+                    saveSubjects();
+                    loadSubjects();
+                }
+            }
+
+            if (addSubjectBtn) {
+                addSubjectBtn.addEventListener('click', addNewSubject);
+            }
+
+            loadSubjects();
+
+            // --- To-Do List Logic ---
+            const newTaskInput = document.getElementById('new-task');
+            const addTaskBtn = document.getElementById('add-task-btn');
+            const taskList = document.getElementById('task-list');
+            const confettiContainer = document.getElementById('confetti-container');
+
+            loadTasks();
+
+            if (addTaskBtn) {
+                addTaskBtn.addEventListener('click', addTask);
+            }
+            if (newTaskInput) {
+                newTaskInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        addTask();
+                    }
+                });
+            }
+
+            function addTask() {
+                const taskText = newTaskInput.value.trim();
+
+                if (taskText === '') {
+                    alert('Oops! Your task is empty. Give it a name!');
+                    return;
+                }
+
+                createTaskElement(taskText, false);
+                saveTasks();
+                newTaskInput.value = '';
+                newTaskInput.focus();
+            }
+
+            function createTaskElement(taskText, isCompleted) {
+                const listItem = document.createElement('li');
+                listItem.classList.add('task-item');
+                if (isCompleted) {
+                    listItem.classList.add('completed');
+                }
+
+                listItem.innerHTML = `
+                    <span>${taskText}</span>
+                    <div class="task-actions">
+                        <input type="checkbox" ${isCompleted ? 'checked' : ''} aria-label="Mark task as complete">
+                        <button class="btn danger delete-btn" aria-label="Delete task"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                `;
+
+                const checkbox = listItem.querySelector('input[type="checkbox"]');
+                checkbox.addEventListener('change', () => {
+                    listItem.classList.toggle('completed');
+                    if (listItem.classList.contains('completed')) {
+                        showConfetti();
+                    }
+                    saveTasks();
+                });
+
+                const deleteBtn = listItem.querySelector('.delete-btn');
+                deleteBtn.addEventListener('click', () => {
+                    if (confirm("Are you sure you want to delete this task?")) {
+                        listItem.remove();
+                        saveTasks();
+                    }
+                });
+
+                if (taskList) {
+                    taskList.appendChild(listItem);
+                }
+            }
+
+            function saveTasks() {
+                const tasks = [];
+                if (taskList) {
+                    taskList.querySelectorAll('.task-item').forEach(item => {
+                        tasks.push({
+                            text: item.querySelector('span').textContent,
+                            completed: item.classList.contains('completed')
+                        });
+                    });
+                }
+                localStorage.setItem('awesomePlannerTasks', JSON.stringify(tasks));
+            }
+
+            function loadTasks() {
+                const storedTasks = localStorage.getItem('awesomePlannerTasks');
+                if (storedTasks) {
+                    const tasks = JSON.parse(storedTasks);
+                    tasks.forEach(task => {
+                        createTaskElement(task.text, task.completed);
+                    });
+                }
+            }
+
+            function showConfetti() {
+                if (!confettiContainer) return;
+                confettiContainer.innerHTML = '';
+
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.style.width = '8px';
+                    confetti.style.height = '8px';
+                    confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                    confetti.style.position = 'absolute';
+                    confetti.style.left = `${Math.random() * 100}%`;
+                    confetti.style.top = `${Math.random() * -20}%`;
+                    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    confetti.style.opacity = '0';
+                    confetti.style.animation = `confetti-fall ${2 + Math.random() * 2}s forwards ease-out ${Math.random() * 0.5}s`;
+                    confetti.style.borderRadius = '50%';
+                    confettiContainer.appendChild(confetti);
+                }
+
+                setTimeout(() => {
+                    confettiContainer.innerHTML = '';
+                }, 4000);
+            }
+
+            // --- Calendar Page Logic ---
+            const currentMonthYearSpan = document.getElementById('current-month-year');
+            const calendarDaysDiv = document.getElementById('calendar-days');
+            const prevMonthBtn = document.getElementById('prev-month-btn');
+            const nextMonthBtn = document.getElementById('next-month-btn');
+
+            const eventTitleInput = document.getElementById('event-title');
+            const eventDateInput = document.getElementById('event-date');
+            const addEventBtn = document.getElementById('add-event-btn');
+
+            let currentCalendarDate = new Date();
+
+            let events = JSON.parse(localStorage.getItem('awesomePlannerEvents')) || [
+                { id: 1, date: "2025-06-14", title: "Project Due" },
+                { id: 2, date: "2025-06-15", title: "Exam Prep" },
+                { id: 3, date: "2025-06-26", title: "Presentation" },
+                { id: 4, date: "2025-07-10", title: "Mid-Term" },
+                { id: 5, date: "2025-07-20", title: "Essay Due" },
+                { id: 6, date: "2025-08-05", title: "Group Project" }
+            ];
+
+            function saveEvents() {
+                localStorage.setItem('awesomePlannerEvents', JSON.stringify(events));
+            }
+
+            function renderCalendar() {
+                if (!calendarDaysDiv || !currentMonthYearSpan) return;
+
+                calendarDaysDiv.innerHTML = '';
+
+                const year = currentCalendarDate.getFullYear();
+                const month = currentCalendarDate.getMonth();
+
+                const options = { year: 'numeric', month: 'long' };
+                currentMonthYearSpan.textContent = currentCalendarDate.toLocaleDateString('en-US', options);
+
+                const firstDayOfMonth = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+                const today = new Date();
+                const todayDay = today.getDate();
+                const todayMonth = today.getMonth();
+                const todayYear = today.getFullYear();
+
+                for (let i = firstDayOfMonth; i > 0; i--) {
+                    const dayCell = document.createElement('span');
+                    dayCell.classList.add('day-cell', 'inactive');
+                    dayCell.innerHTML = `<span class="day-number">${daysInPrevMonth - i + 1}</span>`;
+                    calendarDaysDiv.appendChild(dayCell);
+                }
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayCell = document.createElement('span');
+                    dayCell.classList.add('day-cell');
+                    dayCell.innerHTML = `<span class="day-number">${day}</span>`;
+
+                    if (day === todayDay && month === todayMonth && year === todayYear) {
+                        dayCell.classList.add('current-day');
+                    }
+
+                    const currentDayString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+                    const dayEvents = events.filter(event => event.date === currentDayString);
+
+                    dayEvents.forEach(event => {
+                        const eventDiv = document.createElement('div');
+                        eventDiv.classList.add('event-item');
+                        eventDiv.setAttribute('data-event-id', event.id);
+                        eventDiv.innerHTML = `
+                            <span><i class="fas fa-bullhorn"></i> ${event.title}</span>
+                            <button class="delete-event-btn" aria-label="Delete event"><i class="fas fa-times"></i></button>
+                        `;
+                        dayCell.appendChild(eventDiv);
+                    });
+
+                    calendarDaysDiv.appendChild(dayCell);
+                }
+
+                const totalCells = firstDayOfMonth + daysInMonth;
+                const remainingCells = (7 - (totalCells % 7)) % 7;
+
+                for (let i = 1; i <= remainingCells; i++) {
+                    const dayCell = document.createElement('span');
+                    dayCell.classList.add('day-cell', 'inactive');
+                    dayCell.innerHTML = `<span class="day-number">${i}</span>`;
+                    calendarDaysDiv.appendChild(dayCell);
+                }
+
+                document.querySelectorAll('.delete-event-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const eventId = parseInt(e.currentTarget.closest('.event-item').dataset.eventId);
+                        removeEvent(eventId);
+                    });
+                });
+            }
+
+            function addEvent() {
+                const title = eventTitleInput.value.trim();
+                const date = eventDateInput.value;
+
+                if (title === '' || date === '') {
+                    alert('Please enter both an event title and a date.');
+                    return;
+                }
+
+                const newId = events.length > 0 ? Math.max(...events.map(e => e.id)) + 1 : 1;
+
+                const newEvent = {
+                    id: newId,
+                    date: date,
+                    title: title
+                };
+
+                events.push(newEvent);
+                saveEvents();
+                renderCalendar();
+
+                eventTitleInput.value = '';
+                eventDateInput.value = '';
+            }
+
+            function removeEvent(idToRemove) {
+                const eventToRemove = events.find(e => e.id === idToRemove);
+                if (eventToRemove && confirm(`Are you sure you want to delete "${eventToRemove.title}" on ${eventToRemove.date}?`)) {
+                    events = events.filter(event => event.id !== idToRemove);
+                    saveEvents();
+                    renderCalendar();
+                }
+            }
+
+            if (prevMonthBtn) {
+                prevMonthBtn.addEventListener('click', () => {
+                    currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+                    renderCalendar();
+                });
+            }
+
+            if (nextMonthBtn) {
+                nextMonthDate = new Date(currentCalendarDate); // Create a new Date object to avoid modifying currentCalendarDate directly
+                nextMonthDate.setMonth(nextMonthDate.getMonth() + 1);
+
+                // Ensure the next month is not beyond the year 2025 for this example data
+                if (nextMonthDate.getFullYear() > 2025 || (nextMonthDate.getFullYear() === 2025 && nextMonthDate.getMonth() > 11)) { // Max month is December (11) 2025
+                    alert('The current example data is limited to events within 2025. You can extend this range by adding more event data.');
+                } else {
+                    currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+                    renderCalendar();
+                }
+            }
+
+
+            if (addEventBtn) {
+                addEventBtn.addEventListener('click', addEvent);
+            }
+
+            renderCalendar();
+
+            // --- Study Timer Logic ---
+            const minutesDisplay = document.getElementById('minutes');
+            const secondsDisplay = document.getElementById('seconds');
+            const startBtn = document.getElementById('start-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const timerMessage = document.getElementById('timer-message');
+            const timerCircle = document.getElementById('timer-circle');
+
+            let timer;
+            let totalSeconds;
+            let isPaused = true;
+            let isStudyMode = true;
+
+            const STUDY_TIME = 25 * 60; // 25 minutes
+            const BREAK_TIME = 5 * 60;  // 5 minutes
+
+            function initializeTimer() {
+                totalSeconds = STUDY_TIME;
+                isStudyMode = true;
+                updateDisplay();
+                updateTimerCircle(100);
+                if (startBtn && pauseBtn && resetBtn) {
+                    startBtn.disabled = false;
+                    pauseBtn.disabled = true;
+                    resetBtn.disabled = false;
+                }
+                if (timerMessage) {
+                    timerMessage.textContent = "Let's get some focused work done!";
+                }
+                if (timerCircle) {
+                    timerCircle.classList.remove('break-mode', 'paused');
+                }
+            }
+
+            function updateDisplay() {
+                if (!minutesDisplay || !secondsDisplay) return;
+
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                minutesDisplay.textContent = String(minutes).padStart(2, '0');
+                secondsDisplay.textContent = String(seconds).padStart(2, '0');
+            }
+
+            function updateTimerCircle(percentage) {
+                if (!timerCircle) return;
+                const color = isStudyMode ? 'var(--secondary-color)' : '#A7D9EE';
+                timerCircle.style.background = `conic-gradient(${color} ${percentage}%, transparent ${percentage}%)`;
+            }
+
+            function startTimer() {
+                if (!startBtn || !pauseBtn || !resetBtn || !timerCircle) return;
+                if (!isPaused) return;
+
+                isPaused = false;
+                startBtn.disabled = true;
+                pauseBtn.disabled = false;
+                resetBtn.disabled = false;
+                timerCircle.classList.remove('paused');
+
+                timer = setInterval(() => {
+                    if (totalSeconds > 0) {
+                        totalSeconds--;
+                        updateDisplay();
+                        const percentage = (totalSeconds / (isStudyMode ? STUDY_TIME : BREAK_TIME)) * 100;
+                        updateTimerCircle(percentage);
+                    } else {
+                        clearInterval(timer);
+                        const message = isStudyMode ? "Time for a well-deserved break! 🎉" : "Back to the books! Time to focus! 📚";
+                        alert(message);
+                        toggleMode();
+                        startTimer();
+                    }
+                }, 1000);
+            }
+
+            function pauseTimer() {
+                if (!startBtn || !pauseBtn || !timerCircle) return;
+                clearInterval(timer);
+                isPaused = true;
+                startBtn.disabled = false;
+                pauseBtn.disabled = true;
+                timerCircle.classList.add('paused');
+            }
+
+            function resetTimer() {
+                if (!startBtn || !pauseBtn || !resetBtn || !timerCircle) return;
+                clearInterval(timer);
+                isPaused = true;
+                initializeTimer();
+            }
+
+            function toggleMode() {
+                isStudyMode = !isStudyMode;
+                if (isStudyMode) {
+                    totalSeconds = STUDY_TIME;
+                    timerMessage.textContent = "Let's get some focused work done!";
+                    timerCircle.classList.remove('break-mode');
+                } else {
+                    totalSeconds = BREAK_TIME;
+                    timerMessage.textContent = "Short break time! Stretch those limbs! 🤸‍♀️";
+                    timerCircle.classList.add('break-mode');
+                }
+                updateDisplay();
+                updateTimerCircle(100);
+                startBtn.disabled = false;
+                pauseBtn.disabled = true;
+                timerCircle.classList.remove('paused');
+            }
+
+            initializeTimer();
+
+            if (startBtn) {
+                startBtn.addEventListener('click', startTimer);
+            }
+            if (pauseBtn) {
+                pauseBtn.addEventListener('click', pauseTimer);
+            }
+            if (resetBtn) {
+                resetBtn.addEventListener('click', resetTimer);
+            }
+        });
+    </script>
+</body>
+</html>
